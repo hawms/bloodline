@@ -11,21 +11,17 @@
 </head>
 <body>
 
-    <!-- Container para a animação de fundo -->
     <div id="background-animation"></div>
 
-    <!-- Modal para exibir detalhes do pedido -->
     <div id="details-modal" class="modal-overlay" onclick="fecharDetalhes(event)">
         <div class="modal-content">
             <button class="modal-close-btn" onclick="fecharDetalhes()">×</button>
             <div id="modal-body">
-                <!-- Conteúdo do pedido será injetado aqui -->
-            </div>
+                </div>
         </div>
     </div>
 
     <div class="page-container">
-        <!-- Coluna da Esquerda: Montagem e Pedido Atual -->
         <div class="column-left">
             <div class="builder-section card">
                 <h2>Montar Pedido</h2>
@@ -39,7 +35,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="qtyProducao">2. Informe a quantidade de LOTES: (cada lote = 10 unidades)</label>
+                    <label for="qtyProducao">2. Informe a quantidade de UNIDADES:</label>
                     <input type="number" id="qtyProducao" value="1" min="1">
                 </div>
                 <button id="add-to-order-button" onclick="adicionarAoPedido()">Adicionar ao Pedido</button>
@@ -61,7 +57,6 @@
             </div>
         </div>
 
-        <!-- Coluna da Direita: Histórico -->
         <div class="column-right">
             <div class="history-section card">
                 <h2>Pedidos Pendentes</h2>
@@ -79,7 +74,6 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="script.js"></script>

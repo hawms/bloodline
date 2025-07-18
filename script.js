@@ -58,23 +58,24 @@ let todosOsPedidos = {};
 // --- Funções do Carrinho ---
 
 function adicionarAoPedido() {
-    const lotes = parseInt(document.getElementById('qtyProducao').value);
+    const unidades = parseInt(document.getElementById('qtyProducao').value);
     const municaoSelecionada = document.getElementById('ammo-select').value;
-    if (isNaN(lotes) || lotes < 1) { alert("Insira uma quantidade de lotes válida."); return; }
+    if (isNaN(unidades) || unidades < 1) { alert("Insira uma quantidade de unidades válida."); return; }
     const produtoInfo = produtos.find(p => p.nome === municaoSelecionada);
     if (!produtoInfo) return;
 
     const materiaisCalculados = {};
     for (const mat in produtoInfo.materiais) {
-        materiaisCalculados[mat] = produtoInfo.materiais[mat] * lotes;
+        // Calcula o custo do material por unidade e multiplica pela quantidade desejada, arredondando para cima.
+        const materialPorUnidade = produtoInfo.materiais[mat] / produtoInfo.retornoUnidades;
+        materiaisCalculados[mat] = Math.ceil(materialPorUnidade * unidades);
     }
 
     const item = {
         id: Date.now(),
         nome: produtoInfo.nome,
-        lotes: lotes,
-        unidades: produtoInfo.retornoUnidades * lotes,
-        valorVenda: (produtoInfo.retornoUnidades * lotes) * produtoInfo.precoVendaUnidade,
+        unidades: unidades,
+        valorVenda: unidades * produtoInfo.precoVendaUnidade,
         materiais: materiaisCalculados
     };
     pedidoAtual.push(item);
@@ -96,7 +97,7 @@ function atualizarExibicaoPedido() {
         return;
     }
     pedidoAtual.forEach(item => {
-        itemsContainer.innerHTML += `<div class="order-item"><div class="order-item-details"><strong>${item.lotes}x Lote(s) de ${item.nome}</strong><br><small>Valor: $${item.valorVenda.toLocaleString('pt-BR')}</small></div><button class="order-item-remove-btn" onclick="removerDoPedido(${item.id})">X</button></div>`;
+        itemsContainer.innerHTML += `<div class="order-item"><div class="order-item-details"><strong>${item.unidades}x Unidade(s) de ${item.nome}</strong><br><small>Valor: $${item.valorVenda.toLocaleString('pt-BR')}</small></div><button class="order-item-remove-btn" onclick="removerDoPedido(${item.id})">X</button></div>`;
     });
 
     const totais = calcularTotais(pedidoAtual);
@@ -199,7 +200,7 @@ function abrirDetalhesPedido(pedidoId) {
 
     let itensHTML = '';
     pedido.itens.forEach(item => {
-        itensHTML += `<li>${item.lotes}x Lote(s) de ${item.nome} ($${item.valorVenda.toLocaleString('pt-BR')})</li>`;
+        itensHTML += `<li>${item.unidades}x Unidade(s) de ${item.nome} ($${item.valorVenda.toLocaleString('pt-BR')})</li>`;
     });
 
     let materiaisHTML = `
