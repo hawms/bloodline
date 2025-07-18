@@ -46,10 +46,10 @@ const pedidosRef = database.ref('pedidos');
 
 // 3. DADOS E LÓGICA DA APLICAÇÃO
 const produtos = [
-    { nome: ".50", precoVendaUnidade: 60, materiais: { polvora: 20, capsula: 10, projetilGrande: 10 }, retornoUnidades: 10 },
+    { nome: ".50", precoVendaUnidade: 100, materiais: { polvora: 20, capsula: 10, projetilGrande: 10 }, retornoUnidades: 10 },
     { nome: ".45", precoVendaUnidade: 40, materiais: { polvora: 5, capsula: 10, projetilPequeno: 10 }, retornoUnidades: 10 },
     { nome: ".44", precoVendaUnidade: 40, materiais: { polvora: 10, capsula: 10, projetilPequeno: 10 }, retornoUnidades: 10 },
-    { nome: "9mm", precoVendaUnidade: 40, materiais: { polvora: 10, capsula: 10, projetilPequeno: 10 }, retornoUnidades: 10 }
+    { nome: "9mm", precoVendaUnidade: 60, materiais: { polvora: 10, capsula: 10, projetilPequeno: 10 }, retornoUnidades: 10 }
 ];
 
 let pedidoAtual = [];
