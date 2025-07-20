@@ -1,32 +1,16 @@
 (function() {
     'use strict';
-
     // --- SCRIPT DE PROTEÇÃO CONTRA DEVTOOLS ---
-
-    // 1. Bloqueia o clique com o botão direito
     document.addEventListener('contextmenu', event => event.preventDefault());
-
-    // 2. Bloqueia atalhos de teclado comuns para devtools
     document.addEventListener('keydown', event => {
-        if (event.keyCode === 123 || // F12
-            (event.ctrlKey && event.shiftKey && (event.keyCode === 73 || event.keyCode === 74 || event.keyCode === 67)) || // Ctrl+Shift+I/J/C
-            (event.ctrlKey && event.keyCode === 85)) { // Ctrl+U
+        if (event.keyCode === 123 || (event.ctrlKey && event.shiftKey && (event.keyCode === 73 || event.keyCode === 74 || event.keyCode === 67)) || (event.ctrlKey && event.keyCode === 85)) {
             event.preventDefault();
             return false;
         }
     });
-
-    // 3. Detecta a abertura do devtools e "congela" a aba
-    const devToolsCheck = () => {
-        // O debugger só é ativado quando as ferramentas de desenvolvedor estão abertas
-        debugger;
-    };
-
-    // Executa a verificação em um intervalo para dificultar a desativação
+    const devToolsCheck = () => { debugger; };
     setInterval(devToolsCheck, 1000);
-
 })();
-
 
 // 1. CONFIGURAÇÃO DO FIREBASE
 const firebaseConfig = {
@@ -46,91 +30,85 @@ const pedidosRef = database.ref('pedidos');
 
 // 3. DADOS E LÓGICA DA APLICAÇÃO
 const produtos = [
-    // A receita para 10x 9mm foi movida para a descrição do produto para maior clareza.
     { nome: "9mm", precoVendaUnidade: 60, materiais: { polvora: 10, capsula: 10, projetilPequeno: 10 }, retornoUnidades: 10 },
     { nome: ".50", precoVendaUnidade: 100, materiais: { polvora: 20, capsula: 10, projetilGrande: 10 }, retornoUnidades: 10 },
-    { nome: ".45", precoVendaUnidade: 40, materiais: { polvora: 5, capsula: 10, projetilPequeno: 10 }, retornoUnidades: 10 },
-    { nome: ".44", precoVendaUnidade: 40, materiais: { polvora: 10, capsula: 10, projetilPequeno: 10 }, retornoUnidades: 10 }
+    { nome: ".45", precoVendaUnidade: 40, materiais: { polvora: 10, capsula: 10, projetilPequeno: 10 }, retornoUnidades: 10 }, // Receita do .45 não estava na planilha, mantive a antiga como exemplo.
+    { nome: ".44", precoVendaUnidade: 40, materiais: { polvora: 10, capsula: 10, projetilPequeno: 10 }, retornoUnidades: 10 }  // Receita do .44 não estava na planilha, mantive a antiga como exemplo.
 ];
 
-// !! NOVO BANCO DE DADOS DE RECEITAS !!
-// Cada item tem a quantidade que a receita 'produz' e a lista de 'ingredientes'.
+// !! BANCO DE DADOS DE RECEITAS ATUALIZADO CONFORME A PLANILHA !!
 const receitasDeCrafting = {
-    // Matérias-primas dos componentes da 9mm
+    // Componentes principais
     "polvora":              { produz: 10, ingredientes: { "carvao": 10, "enxofre": 5 } },
-    "rolo_de_cobre":        { produz: 5,  ingredientes: { "barra_de_cobre": 1 } },
-    "chapa_de_aluminio":    { produz: 5,  ingredientes: { "lingote_de_aluminio": 1 } },
-
-    // Corrente de produção do Projétil Pequeno
-    "lingote_de_ferro":     { produz: 2,  ingredientes: { "minerio_de_ferro": 30 } },
-    "chapa_de_ferro":       { produz: 10, ingredientes: { "lingote_de_ferro": 2 } },
-    "haste_de_ferro":       { produz: 10, ingredientes: { "chapa_de_ferro": 10 } },
+    "capsula":              { produz: 10, ingredientes: { "rolo_de_cobre": 10, "chapa_de_aluminio": 10 } },
     "projetil_pequeno":     { produz: 50, ingredientes: { "haste_de_ferro": 10 } },
+    "projetil_grande":      { produz: 50, ingredientes: { "lingote_de_aco": 10 } },
+
+    // Corrente de produção do Ferro
+    "haste_de_ferro":       { produz: 1,  ingredientes: { "chapa_de_ferro": 1 } },
+    "chapa_de_ferro":       { produz: 5,  ingredientes: { "lingote_de_ferro": 1 } },
+    "lingote_de_ferro":     { produz: 1,  ingredientes: { "minerio_de_ferro": 10 } },
+
+    // Corrente de produção do Cobre
+    "rolo_de_cobre":        { produz: 5,  ingredientes: { "lingote_de_cobre": 1 } },
+    "lingote_de_cobre":     { produz: 1,  ingredientes: { "minerio_de_cobre": 10 } },
+
+    // Corrente de produção do Alumínio
+    "chapa_de_aluminio":    { produz: 5,  ingredientes: { "lingote_de_aluminio": 1 } },
+    "lingote_de_aluminio":  { produz: 1,  ingredientes: { "fragmento_de_aluminio": 15 } },
     
-    // Receita de exemplo para Cápsula e Projétil Grande (ajuste conforme necessário)
-    "capsula":              { produz: 1,  ingredientes: { "rolo_de_cobre": 1, "chapa_de_aluminio": 1 } },
-    "projetil_grande":      { produz: 1,  ingredientes: { "haste_de_ferro": 2 } }, // Exemplo
+    // Corrente de produção do Aço
+    "lingote_de_aco":       { produz: 1,  ingredientes: { "liga_de_aco_bruta": 10 } },
+    "liga_de_aco_bruta":    { produz: 5,  ingredientes: { "carvao": 5, "minerio_de_ferro": 5 } },
 };
+
 
 let pedidoAtual = [];
 let todosOsPedidos = {};
-let cacheDeCustos = {}; // Cache para otimizar o cálculo de custos
+let cacheDeCustos = {}; 
 
-// --- NOVO MOTOR DE CÁLCULO DE CUSTO ---
-
-// Função principal que calcula o custo de qualquer item recursivamente
+// --- MOTOR DE CÁLCULO DE CUSTO ---
 function getCostOf(itemId, custosBase) {
-    // 1. Se o custo já foi calculado, retorna do cache
     if (cacheDeCustos[itemId] !== undefined) {
         return cacheDeCustos[itemId];
     }
-
-    // 2. Se for uma matéria-prima básica, retorna o custo digitado pelo usuário
     if (custosBase[itemId] !== undefined) {
         return custosBase[itemId];
     }
-
-    // 3. Se for um item craftável, calcula seu custo
     const receita = receitasDeCrafting[itemId];
     if (receita) {
         let custoTotalDaReceita = 0;
         for (const ingredienteId in receita.ingredientes) {
             const quantidade = receita.ingredientes[ingredienteId];
-            // Chama a si mesma para descobrir o custo do ingrediente
             const custoDoIngrediente = getCostOf(ingredienteId, custosBase);
             custoTotalDaReceita += quantidade * custoDoIngrediente;
         }
         const custoPorUnidade = custoTotalDaReceita / receita.produz;
-        cacheDeCustos[itemId] = custoPorUnidade; // Armazena no cache
+        cacheDeCustos[itemId] = custoPorUnidade; 
         return custoPorUnidade;
     }
-
-    // 4. Se não encontrar o item, seu custo é 0
     return 0;
 }
 
 function lerCustosMateriasPrimasBasicas() {
     return {
-        "minerio_de_ferro":     parseFloat(document.getElementById('custo-minerio_de_ferro').value) || 0,
-        "carvao":               parseFloat(document.getElementById('custo-carvao').value) || 0,
-        "enxofre":              parseFloat(document.getElementById('custo-enxofre').value) || 0,
-        "barra_de_cobre":       parseFloat(document.getElementById('custo-barra_de_cobre').value) || 0,
-        "lingote_de_aluminio":  parseFloat(document.getElementById('custo-lingote_de_aluminio').value) || 0
+        "minerio_de_ferro":       parseFloat(document.getElementById('custo-minerio_de_ferro').value) || 0,
+        "carvao":                 parseFloat(document.getElementById('custo-carvao').value) || 0,
+        "enxofre":                parseFloat(document.getElementById('custo-enxofre').value) || 0,
+        "minerio_de_cobre":       parseFloat(document.getElementById('custo-minerio_de_cobre').value) || 0,
+        "fragmento_de_aluminio":  parseFloat(document.getElementById('custo-fragmento_de_aluminio').value) || 0
     };
 }
 
-
-// --- Funções do Carrinho (Adaptadas para o novo motor) ---
-
+// --- Funções do Carrinho ---
 function recalcularCustosELucros() {
-    cacheDeCustos = {}; // Limpa o cache a cada recalculo
+    cacheDeCustos = {}; 
     const custosBasicos = lerCustosMateriasPrimasBasicas();
 
     pedidoAtual.forEach(item => {
         let custoItem = 0;
         for (const materialId in item.materiais) {
             const quantidadeMaterial = item.materiais[materialId];
-            // Usa o novo motor para obter o custo unitário do material
             const custoUnitarioMaterial = getCostOf(materialId, custosBasicos);
             custoItem += quantidadeMaterial * custoUnitarioMaterial;
         }
@@ -146,7 +124,6 @@ function adicionarAoPedido() {
     const produtoInfo = produtos.find(p => p.nome === municaoSelecionada);
     if (!produtoInfo) return;
 
-    // A lógica para calcular a quantidade de materiais necessários permanece a mesma
     const materiaisCalculados = {};
     for (const mat in produtoInfo.materiais) {
         const materialPorUnidade = produtoInfo.materiais[mat] / produtoInfo.retornoUnidades;
@@ -186,8 +163,8 @@ function atualizarExibicaoPedido() {
 
     let materiaisHTML = ``;
     for(const mat in totais.materiais){
-        let nomeMaterial = mat.replace(/_/g, " "); // Substitui underscores por espaços
-        nomeMaterial = nomeMaterial.charAt(0).toUpperCase() + nomeMaterial.slice(1); // Capitaliza a primeira letra
+        let nomeMaterial = mat.replace(/_/g, " "); 
+        nomeMaterial = nomeMaterial.charAt(0).toUpperCase() + nomeMaterial.slice(1);
         materiaisHTML += `<li>${(totais.materiais[mat] || 0).toLocaleString('pt-BR')} ${nomeMaterial}</li>`
     }
 
@@ -211,7 +188,6 @@ function atualizarExibicaoPedido() {
         </div>
     `;
 }
-
 
 function removerDoPedido(itemId) {
     pedidoAtual = pedidoAtual.filter(item => item.id !== itemId);
@@ -397,7 +373,7 @@ function criarAnimacaoDeFundo() {
 
 window.onload = () => {
     criarAnimacaoDeFundo();
-    atualizarExibicaoPedido(); // Para calcular os custos iniciais com os valores padrão
+    atualizarExibicaoPedido(); 
 };
 
 pedidosRef.on('value', exibirHistorico);
