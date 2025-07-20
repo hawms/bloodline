@@ -1,0 +1,148 @@
+/* --- Configurações Globais e Fundo --- */
+:root {
+    --logo-url: url('https://media.discordapp.net/attachments/1225447032743919716/1377563504512340050/ChatGPT_Image_21_de_mai._de_2025_21_10_29.png?ex=687aadbd&is=68795c3d&hm=69ba6154eb6e71ac25c8a29a9673e211f54a0158f4cd872cb5c82a7a057f6f1a&=&format=webp&quality=lossless&width=656&height=656');
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    color: #ffffff;
+    background: 
+        linear-gradient(to bottom, rgba(107, 0, 0, 0.8), rgba(0, 0, 0, 0.95)),
+        var(--logo-url);
+    background-size: contain, contain;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    background-attachment: fixed, fixed;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* --- Layout Principal em Colunas --- */
+.page-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    padding: 30px;
+    position: relative;
+    z-index: 10;
+}
+
+.column-left, .column-right {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.column-left { flex: 1; min-width: 350px; max-width: 500px; }
+.column-right { flex: 1.5; min-width: 400px; }
+
+/* --- Estilo dos Cards (Tabelas) --- */
+.card {
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 77, 77, 0.4);
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.card h2 {
+    color: #ff4d4d;
+    text-transform: uppercase;
+    font-size: 1.6em;
+    border-bottom: 2px solid #ff4d4d;
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+/* --- Estilos dos Formulários e Botões --- */
+.form-group { text-align: left; margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+.form-group input, .form-group select {
+    width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #555;
+    background-color: #333; color: #fff; font-size: 1.1em; box-sizing: border-box;
+}
+.form-group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+#add-to-order-button { background-color: #007bff; }
+#save-button { background-color: #28a745; width: 100%; }
+#clear-button { background-color: #6c757d; }
+
+button {
+    color: white; font-weight: bold; border: none; padding: 12px 30px;
+    border-radius: 5px; cursor: pointer; text-transform: uppercase;
+    font-size: 16px; transition: all 0.3s;
+}
+button:hover { filter: brightness(1.2); transform: scale(1.03); }
+
+/* --- Pedido Atual (Carrinho) --- */
+.order-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(40, 40, 40, 0.6); padding: 10px 15px;
+    border-radius: 5px; border-left: 4px solid #007bff;
+    margin-bottom: 10px;
+}
+.order-item-remove-btn {
+    background-color: #dc3545; border-radius: 50%; width: 30px;
+    height: 30px; font-weight: bold; cursor: pointer; line-height: 30px;
+    padding: 0;
+}
+#current-order-summary { margin: 20px 0; padding-top: 20px; border-top: 1px dashed #555; text-align: left; }
+#current-order-summary h3, #current-order-summary h4 { margin-top: 0; color: #ff4d4d; }
+#current-order-summary h4 { font-size: 1.1em; margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 5px;}
+.summary-line { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 1.1em; }
+.text-danger { color: #ff5c5c; }
+.text-success { color: #5cff9d; }
+
+/* --- Listas de Histórico --- */
+.order-list { display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto; padding-right: 10px; min-height: 50px; }
+.history-item {
+    background: rgba(50, 50, 50, 0.8); border-radius: 5px; padding: 15px;
+    text-align: left; transition: background-color 0.3s;
+}
+.pending-item { border-left: 5px solid #ffae42; cursor: pointer; }
+.pending-item:hover { background: rgba(80, 80, 80, 0.9); }
+.delivered-item { border-left: 5px solid #28a745; opacity: 0.7; }
+.history-item-header { display: flex; justify-content: space-between; align-items: center; }
+.client-name { font-size: 1.2em; font-weight: bold; color: #ffafaf; }
+.order-date { font-size: 0.8em; color: #999; }
+.history-item-footer { border-top: 1px dashed #555; padding-top: 10px; margin-top: 10px; font-weight: bold; }
+
+/* --- Modal --- */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s;
+}
+.modal-overlay.visible { opacity: 1; visibility: visible; }
+.modal-content {
+    background: #1e1e1e; border: 1px solid #ff4d4d; border-radius: 10px;
+    padding: 30px; width: 90%; max-width: 600px; position: relative;
+    transform: scale(0.9); transition: transform 0.3s;
+}
+.modal-overlay.visible .modal-content { transform: scale(1); }
+.modal-close-btn {
+    position: absolute; top: 10px; right: 15px; background: none;
+    border: none; color: white; font-size: 2em; cursor: pointer;
+}
+#modal-body h3, #modal-body h4 { color: #ff4d4d; border-bottom: 1px solid #ff4d4d; padding-bottom: 10px; }
+#modal-body ul { list-style-position: inside; padding-left: 0; }
+#confirm-delivery-btn { background-color: #28a745; width: 100%; margin-top: 20px; }
+
+/* --- Animação de Fundo --- */
+#background-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; overflow: hidden; pointer-events: none; }
+.glock { position: absolute; top: -50px; width: 30px; height: auto; opacity: 0.15; animation: fall linear infinite; }
+.glock svg { display: block; width: 100%; height: 100%; }
+
+@keyframes fall {
+    to { transform: translateY(105vh) rotate(60deg); }
+}
